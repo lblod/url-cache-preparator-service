@@ -4,6 +4,7 @@ const EXT_PREFIX = 'ext: <http://mu.semte.ch/vocabularies/ext/>';
 const TOEZICHT_PREFIX = 'toezicht: <http://mu.semte.ch/vocabularies/ext/supervision/>';
 const ADMS_PREFIX = 'adms: <http://www.w3.org/ns/adms#>';
 const READY_TO_BE_CACHED = 'ready-to-be-cached';
+const PUBLIC_GRAPH = 'http://mu.semte.ch/graphs/public';
 
 async function fetchLinksToBeCached() {
   let q = `
@@ -44,12 +45,12 @@ async function setReadyToBeCachedStatus(fileAddress) {
     PREFIX ${ADMS_PREFIX}
 
     INSERT {
-      GRAPH ?g {
+      GRAPH ${sparqlEscapeUri(PUBLIC_GRAPH)} {
         ${sparqlEscapeUri(fileAddress.uri.value)} ext:fileAddressCacheStatus ?fileAddressCacheStatus .
       }
     }
     WHERE {
-      GRAPH ?g {
+      GRAPH ${sparqlEscapeUri(PUBLIC_GRAPH)} {
         ?fileAddressCacheStatus a ext:fileAddressCacheStatus ;
           ext:fileAddressCacheStatusLabel ${sparqlEscapeString(READY_TO_BE_CACHED)} .
       }
