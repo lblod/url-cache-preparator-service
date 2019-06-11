@@ -1,8 +1,10 @@
-import { query, sparqlEscapeUri, sparqlEscapeString } from 'mu';
+import { query, sparqlEscapeUri, sparqlEscapeString, uuid } from 'mu';
 
 const EXT_PREFIX = 'ext: <http://mu.semte.ch/vocabularies/ext/>';
 const TOEZICHT_PREFIX = 'toezicht: <http://mu.semte.ch/vocabularies/ext/supervision/>';
 const ADMS_PREFIX = 'adms: <http://www.w3.org/ns/adms#>';
+const DOWNLOAD_PREFIX = 'download: <http://mu.semte.ch/vocabularies/ext/download/>';
+const TMO_PREFIX = 'tmo: <http://www.semanticdesktop.org/ontologies/2008/05/20/tmo#>';
 const READY_TO_BE_CACHED = 'ready-to-be-cached';
 const PUBLIC_GRAPH = 'http://mu.semte.ch/graphs/public';
 
@@ -37,22 +39,22 @@ async function fetchLinksToBeCached() {
   return qResults.results.bindings || [];
 };
 
-async function setReadyToBeCachedStatus(fileAddress) {
-  console.log(fileAddress.uri.value);
+async function createDownloadTask(fileAddress) {
   let q = `
     PREFIX ${EXT_PREFIX}
-    PREFIX ${TOEZICHT_PREFIX}
-    PREFIX ${ADMS_PREFIX}
+    PREFIX ${DOWNLOAD_PREFIX}
+    PREFIX ${TMO_PREFIX}
 
     INSERT {
       GRAPH ${sparqlEscapeUri(PUBLIC_GRAPH)} {
-        ${sparqlEscapeUri(fileAddress.uri.value)} ext:fileAddressCacheStatus ?fileAddressCacheStatus .
+        ?task a download:DownloadTask .
+        ?task download:httpStatus <http://data.lblod.info/id/download-task-statuses/not-started> .
+        ?task tmo:taskSource ${sparqlEscapeUri(fileAddress.uri.value)} .
       }
     }
     WHERE {
       GRAPH ${sparqlEscapeUri(PUBLIC_GRAPH)} {
-        ?fileAddressCacheStatus a ext:fileAddressCacheStatus ;
-          ext:fileAddressCacheStatusLabel ${sparqlEscapeString(READY_TO_BE_CACHED)} .
+        BIND(IRI(CONCAT("http://data.lblod.info/id/download-tasks/", "${(uuid())}")) AS ?task)
       }
     }
   `;
@@ -67,4 +69,4 @@ async function setReadyToBeCachedStatus(fileAddress) {
 };
 
 
-export { fetchLinksToBeCached, setReadyToBeCachedStatus }
+export { fetchLinksToBeCached, createDownloadTask }

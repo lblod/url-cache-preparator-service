@@ -1,6 +1,7 @@
 # url cache preparator service
 
-A microservice that periodically looks for in the database for urls that are ready to be cached and set their status as "ready-to-be-cached".
+A microservice that periodically looks in the database for uris that are ready
+to be cached. It then creates a downloadTask to notify which file addresses need to be cached.
 
 Environment variables:
 ```

@@ -1,13 +1,13 @@
 import { app, errorHandler } from 'mu';
 import { CronJob } from 'cron';
-import { fetchLinksToBeCached, setReadyToBeCachedStatus } from './queries';
+import { fetchLinksToBeCached, createDownloadTask } from './queries';
 
 const CRON_FREQUENCY = process.env.CRON_PATTERN || '0 */15 * * * *';
 
 app.use(errorHandler);
 
 new CronJob(CRON_FREQUENCY, async function() {
-  console.log(`Download-preparator-service triggered by cron job at ${new Date().toISOString()}`);
+  console.log(`Url-cache-preparator-service triggered by cron job at ${new Date().toISOString()}`);
   await processUncachedLinks();
 }, null, true);
 
@@ -15,6 +15,6 @@ async function processUncachedLinks() {
   const fileAddresses = await fetchLinksToBeCached();
 
   Promise.all(fileAddresses.map(async (fileAddress) => {
-    await setReadyToBeCachedStatus(fileAddress);
+    await createDownloadTask(fileAddress);
   }));
 }
